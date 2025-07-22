@@ -46,9 +46,11 @@ class SparQLWrapper:
 
     def get_instances_of_type(self, instance_type):
         q = """
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             SELECT ?s
             WHERE {
-                ?s a ?t .
+                ?s a ?subtype .
+                ?subtype rdfs:subClassOf* ?t .
             }
             """
         n = [r['s'] for r in self.graph.query(q, initBindings={'t': instance_type})]

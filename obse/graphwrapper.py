@@ -1,6 +1,7 @@
 from rdflib import Graph, Literal, RDF, RDFS, URIRef, BNode, Seq
 from rdflib.namespace import XSD
 from .namespace import MBA
+from typing import List
 
 
 def type_str(rdf_type: URIRef) -> str:
@@ -49,6 +50,9 @@ class GraphWrapper:
     def add_type(self, rdf_type: URIRef, rdf_object: URIRef):
         self.graph.add((rdf_object, RDF.type, rdf_type))
 
+    def add_comment(self, rdf_object: URIRef, comment: str) -> None:
+        self.graph.add((rdf_object, RDFS.comment, Literal(comment, datatype=XSD.string)))   
+
     def add_sequence(self, name: str) -> URIRef:
         rdf_object = create_ref(RDF.Seq, name)
         self.graph.add((rdf_object, RDF.type, RDF.Seq))
@@ -71,3 +75,16 @@ class GraphWrapper:
 
     def add_url_property(self, property_type: URIRef, source: URIRef, value: str) -> None:
         self.graph.add((source, property_type, URIRef(value)))
+
+    def add_str_property_sequence(self, property_type: URIRef, source: URIRef, values: List[str]) -> Seq:
+
+        # Sequence erstellen
+        seq = BNode()  # Blank Node für die Seq
+        self.graph.add((seq, RDF.type, RDF.Seq))
+
+        # Elemente zur Seq hinzufügen
+        for i, value in enumerate(values):
+            self.graph.add((seq, URIRef(RDF[f"_{i+1}"]), Literal(value, datatype=XSD.string)))
+
+        # Sequence mit der Execution verknüpfen
+        self.graph.add((source, property_type, seq))
