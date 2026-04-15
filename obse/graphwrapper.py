@@ -1,6 +1,5 @@
 from rdflib import Graph, Literal, RDF, RDFS, URIRef, BNode, Seq
 from rdflib.namespace import XSD
-from .namespace import MBA
 from typing import List
 
 
@@ -9,15 +8,15 @@ def type_str(rdf_type: URIRef) -> str:
     return s.split("#")[1]
 
 
-def create_ref(rdf_type: URIRef, name: str) -> URIRef:
-    identifier = type_str(rdf_type) + "-"+name.replace(" ", "-").replace("\\", "-")
-    return URIRef(MBA.URL+"#"+identifier)
-
-
 class GraphWrapper:
 
-    def __init__(self, graph: Graph):
+    def __init__(self, graph: Graph, base_url: str):
         self.graph = graph
+        self.base_url = base_url
+
+    def create_ref(self, rdf_type: URIRef, name: str) -> URIRef:
+        identifier = type_str(rdf_type) + "-"+name.replace(" ", "-").replace("\\", "-")
+        return URIRef(self.base_url+"#"+identifier)
 
     def add_bnode(self, rdf_type: URIRef) -> URIRef:
         rdf_object = BNode()
@@ -27,22 +26,22 @@ class GraphWrapper:
     def add_named_instance(self, rdf_type: URIRef, name: str, unique_name: str = None) -> URIRef:
         if unique_name is None:
             unique_name = name
-        rdf_object = create_ref(rdf_type, unique_name)
+        rdf_object = self.create_ref(rdf_type, unique_name)
         self.graph.add((rdf_object, RDF.type, rdf_type))
-        self.graph.add((rdf_object, MBA.name, Literal(name, datatype=XSD.string)))
+        self.graph.add((rdf_object, RDFS.label, Literal(name, datatype=XSD.string)))
         return rdf_object
 
     def add_instance(self, rdf_type: URIRef, name: str, unique_name: str = None) -> URIRef:
         if unique_name is None:
             unique_name = name
-        rdf_object = create_ref(rdf_type, unique_name)
+        rdf_object = self.create_ref(rdf_type, unique_name)
         self.graph.add((rdf_object, RDF.type, rdf_type))
         return rdf_object
 
     def add_labeled_instance(self, rdf_type: URIRef, name: str, unique_name: str = None) -> URIRef:
         if unique_name is None:
             unique_name = name
-        rdf_object = create_ref(rdf_type, unique_name)
+        rdf_object = self.create_ref(rdf_type, unique_name)
         self.graph.add((rdf_object, RDF.type, rdf_type))
         self.graph.add((rdf_object, RDFS.label, Literal(name, datatype=XSD.string)))
         return rdf_object
@@ -54,7 +53,7 @@ class GraphWrapper:
         self.graph.add((rdf_object, RDFS.comment, Literal(comment, datatype=XSD.string)))   
 
     def add_sequence(self, name: str) -> URIRef:
-        rdf_object = create_ref(RDF.Seq, name)
+        rdf_object = self.create_ref(RDF.Seq, name)
         self.graph.add((rdf_object, RDF.type, RDF.Seq))
         return rdf_object
 

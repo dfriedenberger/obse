@@ -23,7 +23,7 @@ from obse.graphwrapper import GraphWrapper
 
 graph = Graph()
 
-graph_wrapper = GraphWrapper(graph)
+graph_wrapper = GraphWrapper(graph, "https://www.frittenburger.de/test")
 instance_type = URIRef("https://www.frittenburger.de/test#TestClass")
 graph_wrapper.add_named_instance(instance_type, "test-instance")
 

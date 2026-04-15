@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-04-15
+### Changed
+- make GraphWrapper base URL configurable via constructor
+- replace MBA.name usage with rdfs:label for named instances
+- update tests and README usage examples for the new GraphWrapper signature
+
 ## [1.3.0] - 2024-10-23
 ### Changed
 - extend wrappers and queries
