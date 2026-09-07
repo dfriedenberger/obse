@@ -15,7 +15,10 @@ class GraphWrapper:
         self.base_url = base_url
 
     def create_ref(self, rdf_type: URIRef, name: str) -> URIRef:
-        identifier = type_str(rdf_type) + "-"+name.replace(" ", "-").replace("\\", "-")
+        if rdf_type:
+            identifier = type_str(rdf_type) + "-"+name.replace(" ", "-").replace("\\", "-")
+        else:
+            identifier = name.replace(" ", "-").replace("\\", "-")
         return URIRef(self.base_url+"#"+identifier)
 
     def add_bnode(self, rdf_type: URIRef) -> URIRef:
@@ -24,14 +27,19 @@ class GraphWrapper:
         return rdf_object
 
     def add_named_instance(self, rdf_type: URIRef, name: str, unique_name: str = None) -> URIRef:
-        if unique_name is None:
-            unique_name = name
-        rdf_object = self.create_ref(rdf_type, unique_name)
+        """Add a labeled instance using a type-prefixed URI and return its URI."""
+        return self.add_labeled_instance(rdf_type, name, unique_name)
+
+    def add_typed_instance(self, rdf_type: URIRef, identifier: str, label: str = None) -> URIRef:
+        """Add a typed instance using the identifier directly as the URI fragment."""
+        rdf_object = self.create_ref(None, identifier)
         self.graph.add((rdf_object, RDF.type, rdf_type))
-        self.graph.add((rdf_object, RDFS.label, Literal(name, datatype=XSD.string)))
+        if label:
+            self.graph.add((rdf_object, RDFS.label, Literal(label, datatype=XSD.string)))
         return rdf_object
 
     def add_instance(self, rdf_type: URIRef, name: str, unique_name: str = None) -> URIRef:
+        """Add an unlabeled instance using a type-prefixed URI."""
         if unique_name is None:
             unique_name = name
         rdf_object = self.create_ref(rdf_type, unique_name)
@@ -39,6 +47,7 @@ class GraphWrapper:
         return rdf_object
 
     def add_labeled_instance(self, rdf_type: URIRef, name: str, unique_name: str = None) -> URIRef:
+        """Add a labeled instance using a type-prefixed URI."""
         if unique_name is None:
             unique_name = name
         rdf_object = self.create_ref(rdf_type, unique_name)
